@@ -1,0 +1,43 @@
+version: '3.7'
+
+
+services:
+  distributor:
+    build: .
+    command: >
+      sh -c "python manage.py runserver 8000"
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/web
+    restart: always
+
+  node1:
+    build: .
+    command: >
+      sh -c "python manage.py runserver 8001"
+    ports:
+      - 8001:8001
+    volumes:
+      - ./:/web
+    restart: always
+
+  node2:
+    build: .
+    command: >
+      sh -c "python manage.py runserver 8002"
+    ports:
+      - 8002:8002
+    volumes:
+      - ./:/web
+    restart: always
+
+  node3:
+    build: .
+    command: >
+      sh -c "python manage.py runserver 8003"
+    ports:
+      - 8003:8003
+    volumes:
+      - ./:/web
+    restart: always
