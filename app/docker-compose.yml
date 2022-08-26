@@ -5,9 +5,11 @@ services:
   distributor:
     build: .
     command: >
-      sh -c "python manage.py runserver 8000"
+      sh -c "python manage.py runserver 0.0.0.0:8004"
     ports:
-      - 8000:8000
+      - 8004:8004
+    networks:
+      - distr_net
     volumes:
       - ./:/web
     restart: always
@@ -15,9 +17,11 @@ services:
   node1:
     build: .
     command: >
-      sh -c "python manage.py runserver 8001"
+      sh -c "python manage.py runserver 0.0.0.0:8001"
     ports:
       - 8001:8001
+    networks:
+      - distr_net
     volumes:
       - ./:/web
     restart: always
@@ -25,9 +29,11 @@ services:
   node2:
     build: .
     command: >
-      sh -c "python manage.py runserver 8002"
+      sh -c "python manage.py runserver 0.0.0.0:8002"
     ports:
       - 8002:8002
+    networks:
+      - distr_net
     volumes:
       - ./:/web
     restart: always
@@ -35,9 +41,17 @@ services:
   node3:
     build: .
     command: >
-      sh -c "python manage.py runserver 8003"
+      sh -c "python manage.py runserver 0.0.0.0:8003"
     ports:
       - 8003:8003
+    networks:
+      - distr_net
     volumes:
       - ./:/web
     restart: always
+
+networks:
+  distr_net:
+    external: true
+
+

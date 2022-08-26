@@ -10,6 +10,7 @@ last_port=-1
 
 @api_view(('GET',))
 def send_to(request):
+    req = 'No any alive servers ;('
     for port in ports:
         try:
             URL = get_url()
