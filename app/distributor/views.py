@@ -3,15 +3,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 import requests
-ports=[8001, 8002, 8003]
-last_port=-1
-# URL = f"http://localhost:{ports[0]}/service"
+
+hosts=['1', '2', '3', '4', '5']
+last_host=-1
 
 
 @api_view(('GET',))
 def send_to(request):
     req = 'No any alive servers ;('
-    for port in ports:
+    for host in hosts:
         try:
             URL = get_url()
             req = requests.get(URL)
@@ -23,9 +23,9 @@ def send_to(request):
 
 
 def get_url():
-    global last_port
-    last_port = last_port + 1
-    if (last_port == 3):
-        last_port = 0
-    URL = f"http://localhost:{ports[last_port]}/service"
+    global last_host
+    last_host += 1
+    if (last_host == 5):
+        last_host = 0
+    URL = f"http://node{hosts[last_host]}:800{hosts[last_host]}/service"
     return URL

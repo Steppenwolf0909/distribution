@@ -5,19 +5,29 @@ services:
   distributor:
     build: .
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8004"
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - .env
     ports:
-      - 8004:8004
+      - 8000:8000
     networks:
       - distr_net
     volumes:
       - ./:/web
     restart: always
+    depends_on:
+      - postgres
 
   node1:
     build: .
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8001"
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8001"
+    env_file:
+      - .env
     ports:
       - 8001:8001
     networks:
@@ -25,11 +35,17 @@ services:
     volumes:
       - ./:/web
     restart: always
+    depends_on:
+      - postgres
 
   node2:
     build: .
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8002"
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8002"
+    env_file:
+      - .env
     ports:
       - 8002:8002
     networks:
@@ -37,11 +53,17 @@ services:
     volumes:
       - ./:/web
     restart: always
+    depends_on:
+      - postgres
 
   node3:
     build: .
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8003"
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8003"
+    env_file:
+      - .env
     ports:
       - 8003:8003
     networks:
@@ -49,6 +71,85 @@ services:
     volumes:
       - ./:/web
     restart: always
+    depends_on:
+      - postgres
+
+  node4:
+    build: .
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8004"
+    env_file:
+      - .env
+    ports:
+      - 8004:8004
+    networks:
+      - distr_net
+    volumes:
+      - ./:/web
+    restart: always
+    depends_on:
+      - postgres
+  
+  node5:
+    build: .
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8005"
+    env_file:
+      - .env
+    ports:
+      - 8005:8005
+    networks:
+      - distr_net
+    volumes:
+      - ./:/web
+    restart: always
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:alpine
+    command: redis-server --port 6500
+    networks:
+      - distr_net
+    ports:
+      - "6500:6500"
+
+  celery-worker:
+    build: .
+    command: celery -A app worker -l INFO
+    depends_on:
+      - redis
+      - node1
+      - node2
+      - node3
+      - node4
+      - node5
+    volumes:
+      - ./app/logs/:/web/logs/
+  
+  celery-beat:
+    build: .
+    command: celery -A app beat -l INFO
+    depends_on:
+      - celery-worker
+  
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: LoadDistr
+    volumes:
+      - ./data:/var/lib/postgresql/data1
+    ports:
+      - "5600:5432"
+    networks:
+      - distr_net
 
 networks:
   distr_net:

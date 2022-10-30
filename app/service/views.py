@@ -2,6 +2,9 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
+import time
+
+from . import models
 
 counter=0
 
@@ -9,5 +12,12 @@ counter=0
 def service(request):
     global counter
     counter+=1
-    print(f'Server{request.META["SERVER_PORT"]} work on {counter}"s request')
-    return Response(f'Server{request.META["SERVER_PORT"]} work on {counter}"s request', status=status.HTTP_200_OK)
+    print(models.RequestCounter.objects.all())
+    models.RequestCounter.objects.update_or_create(
+        server_port=int(request.META["SERVER_PORT"]),
+        defaults={
+            "count": counter,
+        }
+    )
+    return Response(f'Server {request.META["SERVER_PORT"]} made {counter} requests', status=status.HTTP_200_OK)
+
