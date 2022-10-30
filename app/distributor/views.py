@@ -7,7 +7,6 @@ import requests
 hosts=['1', '2', '3', '4', '5']
 last_host=-1
 
-
 @api_view(('GET',))
 def send_to(request):
     req = 'No any alive servers ;('
@@ -25,6 +24,7 @@ def send_to(request):
 def get_url():
     global last_host
     last_host += 1
+    print(int(hosts[len(hosts)-1]))
     if (last_host == 5):
         last_host = 0
     URL = f"http://node{hosts[last_host]}:800{hosts[last_host]}/service"

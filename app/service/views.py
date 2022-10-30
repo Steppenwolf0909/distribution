@@ -6,14 +6,17 @@ import time
 
 from . import models
 
-counter=0
 
 @api_view(('GET',))
 def service(request):
-    global counter
-    counter+=1
-    print(models.RequestCounter.objects.all())
-    models.RequestCounter.objects.update_or_create(
+    requestCounter = models.RequestCount.objects.filter(
+        server_port=int(request.META["SERVER_PORT"])
+    ).first()
+    if not requestCounter:
+        counter = 1
+    else:
+        counter = requestCounter.count + 1
+    models.RequestCount.objects.update_or_create(
         server_port=int(request.META["SERVER_PORT"]),
         defaults={
             "count": counter,

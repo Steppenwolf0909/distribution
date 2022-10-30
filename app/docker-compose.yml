@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 
 services:
@@ -22,10 +22,7 @@ services:
 
   node1:
     build: .
-    command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8001"
+    command: python manage.py runserver 0.0.0.0:8001
     env_file:
       - .env
     ports:
@@ -36,14 +33,12 @@ services:
       - ./:/web
     restart: always
     depends_on:
+      - distributor
       - postgres
 
   node2:
     build: .
-    command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8002"
+    command: python manage.py runserver 0.0.0.0:8002
     env_file:
       - .env
     ports:
@@ -54,14 +49,12 @@ services:
       - ./:/web
     restart: always
     depends_on:
+      - distributor
       - postgres
 
   node3:
     build: .
-    command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8003"
+    command: python manage.py runserver 0.0.0.0:8003
     env_file:
       - .env
     ports:
@@ -72,14 +65,12 @@ services:
       - ./:/web
     restart: always
     depends_on:
+      - distributor
       - postgres
 
   node4:
     build: .
-    command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8004"
+    command: python manage.py runserver 0.0.0.0:8004
     env_file:
       - .env
     ports:
@@ -90,14 +81,12 @@ services:
       - ./:/web
     restart: always
     depends_on:
+      - distributor
       - postgres
   
   node5:
     build: .
-    command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8005"
+    command: python manage.py runserver 0.0.0.0:8005
     env_file:
       - .env
     ports:
@@ -108,6 +97,7 @@ services:
       - ./:/web
     restart: always
     depends_on:
+      - distributor
       - postgres
 
   redis:
@@ -121,6 +111,8 @@ services:
   celery-worker:
     build: .
     command: celery -A app worker -l INFO
+    networks:
+      - distr_net
     depends_on:
       - redis
       - node1
@@ -129,10 +121,12 @@ services:
       - node4
       - node5
     volumes:
-      - ./app/logs/:/web/logs/
+      - ./logs/:/web/logs/
   
   celery-beat:
     build: .
+    networks:
+      - distr_net
     command: celery -A app beat -l INFO
     depends_on:
       - celery-worker
@@ -143,7 +137,7 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: LoadDistr
+      POSTGRES_DB: LoadDB
     volumes:
       - ./data:/var/lib/postgresql/data1
     ports:
@@ -153,6 +147,5 @@ services:
 
 networks:
   distr_net:
-    external: true
 
 
